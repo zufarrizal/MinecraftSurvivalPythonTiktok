@@ -11,7 +11,7 @@ con = mcrcon.MCRcon("localhost", "123", 25575)
 expiry_date = datetime.date(2023, 12, 29)
 
 # Username
-client: TikTokLiveClient = TikTokLiveClient(unique_id="@garakushi2")
+client: TikTokLiveClient = TikTokLiveClient(unique_id="@mjup96")
 
 # Connect
 @client.on("connect")
