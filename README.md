@@ -12,8 +12,8 @@ Before running the project, you need to install the following packages:
 1. Clone the repository.
 2. In the `MinecraftSurvival.py` file, change `expiry_date = datetime.date(2023, 12, 29)` to the desired expiry date for the functionality to work.
 3. Change `(unique_id="@mjup96")` to your TikTok username.
-4. Run the `MinecraftSurvival.py` file.
-
+4. Make sure your TikTok is live
+5. Run the `MinecraftSurvival.py` file.
 ## Technologies Used
 - Python
 
