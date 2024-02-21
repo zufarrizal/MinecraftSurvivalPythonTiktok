@@ -1,2 +1,24 @@
-<p>This File is Free to Use and Customized to users.</p>
-<p>This application will make you play Minecraft full of challenges because you are disturbed by live viewers who give you prizes. each prize can turn into a mob or valuable item</p>
+# MinecraftSurvivalPythonTiktok
+
+## Description
+MinecraftSurvivalPythonTiktok is a Python project related to Minecraft Survival. This file is free to use and customized to users.
+
+## Requirements
+Before running the project, you need to install the following packages:
+1. `mcrcon`: Install it using the command `pip install mcrcon`
+2. `TikTokLive`: Install it using the command `pip install TikTokLive`
+
+## How to Use
+1. Clone the repository.
+2. In the `MinecraftSurvival.py` file, change `expiry_date = datetime.date(2023, 12, 29)` to the desired expiry date for the functionality to work.
+3. Change `(unique_id="@mjup96")` to your TikTok username.
+4. Run the `MinecraftSurvival.py` file.
+
+## Technologies Used
+- Python
+
+## Contribution
+You can contribute to the development of MinecraftSurvivalPythonTiktok by creating an account on GitHub and forking this repository.
+
+## License
+The license has not been determined. For more information, please contact the repository owner.
