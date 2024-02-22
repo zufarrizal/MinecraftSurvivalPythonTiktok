@@ -21,6 +21,6 @@ Before running the project, you need to install the following packages:
 You can contribute to the development of MinecraftSurvivalPythonTiktok by creating an account on GitHub and forking this repository.
 
 ## License
-Please see the `license agreement <https://github.com/zufarrizal/MinecraftSurvivalPythonTiktok?tab=MIT-1-ov-file>`_.
+Please see the `<a href="https://github.com/zufarrizal/MinecraftSurvivalPythonTiktok?tab=MIT-1-ov-file">license agreement</a>`.
 
 
