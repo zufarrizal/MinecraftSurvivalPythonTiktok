@@ -25,18 +25,19 @@ async def on_connect(event: ConnectEvent):
 @client.on(JoinEvent)
 async def on_join(event: JoinEvent):
     with con as mcr:
-        mcr.command('title @a subtitle {"text":"' + event.user.nickname + '", "color":"red"}')
-        mcr.command('title @a title {"text":"Welcome", "color":"green"}')
+        # mcr.command('title @a subtitle {"text":"' + event.user.nickname + '", "color":"red"}')
+        # mcr.command('title @a title {"text":"Welcome", "color":"green"}')
+        mcr.command('tellraw @a [{"text":"Welcome ", "color":"green"},{"text":"' + event.user.nickname + '", "color":"red"}]')
         mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
 
-@client.on(LikeEvent)
-async def on_like(event: LikeEvent):
-    if LikeEvent.count == 25:
-        with con as mcr:
-            mcr.command('title @a subtitle {"text":"Spawn Zombie", "color":"white"}')
-            mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
-            mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
-            mcr.command('execute at @p run summon minecraft:zombie ~ ~ ~')
+# @client.on(LikeEvent)
+# async def on_like(event: LikeEvent):
+#     if LikeEvent == 25:
+#         with con as mcr:
+#             mcr.command('title @a subtitle {"text":"Spawn Zombie", "color":"white"}')
+#             mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
+#             mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
+#             mcr.command('execute at @p run summon minecraft:zombie ~ ~ ~')
 
 # Comment
 @client.on(CommentEvent)
@@ -63,7 +64,7 @@ async def on_share(event: ShareEvent):
 @client.on(GiftEvent)
 async def on_gift(event: GiftEvent):
     #Streakable Gift      
-    print(f"{event.user.nickname} -> {event.gift.id} STREAK")
+    print(f"{event.user.nickname} -> {event.gift.id} -> {event.gift.name} STREAK")
     if event.gift.streakable and not event.streaking:
         #Gift Rose = Golden Carrots
         if event.gift.id == 5655:
@@ -305,12 +306,12 @@ async def on_gift(event: GiftEvent):
                 i+=1
         else:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x ' + str(event.gift.info.name) + '", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x ' + str(event.gift.name) + '", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             return
     #Non Streakable Gift          
     elif not event.gift.streakable:
-        print(f"{event.user.nickname} -> {event.gift.id} NON STREAK")
+        print(f"{event.user.nickname} -> {event.gift.id} -> {event.gift.name} NON STREAK")
         #Gift Heart Me = TNT
         if event.gift.id == 7934:
             with con as mcr:
@@ -481,11 +482,9 @@ async def on_gift(event: GiftEvent):
                 mcr.command('execute at @p run give @p minecraft:netherite_shovel{Enchantments:[{id:"minecraft:silk_touch",lvl:1},{id:"minecraft:unbreaking",lvl:100}]}')
         else:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":"sent ' + str(event.gift.info.name) + '", "color":"white"}')
+                mcr.command('title @a subtitle {"text":"sent ' + str(event.gift.name) + '", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             return
-
-
 
 def start_client():
     client.run()
