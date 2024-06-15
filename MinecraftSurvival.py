@@ -5,63 +5,73 @@ from tkinter import messagebox
 import mcrcon
 import time
 from TikTokLive import TikTokLiveClient
-from TikTokLive.types.events import CommentEvent, ConnectEvent, GiftEvent, LikeEvent, FollowEvent, ShareEvent, JoinEvent
+from TikTokLive.events import CommentEvent, ConnectEvent, GiftEvent, LikeEvent, FollowEvent, ShareEvent, JoinEvent
 con = mcrcon.MCRcon("localhost", "123", 25575)
 
-expiry_date = datetime.date(2023, 12, 29)
+expiry_date = datetime.date(2025, 1, 1)
 
 # Username
 client: TikTokLiveClient = TikTokLiveClient(unique_id="@mjup96")
 
 # Connect
-@client.on("connect")
-async def on_connect(_: ConnectEvent):
+@client.on(ConnectEvent)
+async def on_connect(event: ConnectEvent):
     with con as mcr:
         print("Connected to Room ID:", client.room_id)
         mcr.command('tellraw @a {"text":"Running Application", "color":"green"}')
         mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
 
 # Join
-@client.on("join")
+@client.on(JoinEvent)
 async def on_join(event: JoinEvent):
     with con as mcr:
         mcr.command('title @a subtitle {"text":"' + event.user.nickname + '", "color":"red"}')
         mcr.command('title @a title {"text":"Welcome", "color":"green"}')
         mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
 
+@client.on(LikeEvent)
+async def on_like(event: LikeEvent):
+    if LikeEvent.count == 25:
+        with con as mcr:
+            mcr.command('title @a subtitle {"text":"Spawn Zombie", "color":"white"}')
+            mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
+            mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
+            mcr.command('execute at @p run summon minecraft:zombie ~ ~ ~')
+
 # Comment
+@client.on(CommentEvent)
 async def on_comment(event: CommentEvent):
     with con as mcr:
         mcr.command('tellraw @a [{"text":"' + event.user.nickname + '", "color":"red"},{"text":" -> ", "color":"white"},{"text":"' + event.comment + '", "color":"yellow"}]')
         mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
 
 # Follow
-@client.on("follow")
+@client.on(FollowEvent)
 async def on_follow(event: FollowEvent):
     with con as mcr:
         mcr.command('tellraw @a [{"text":"' + event.user.nickname + '", "color":"red"},{"text":" Following Streamers!", "color":"yellow"}]')
         mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
 
 # Share
-@client.on("share")
+@client.on(ShareEvent)
 async def on_share(event: ShareEvent):
     with con as mcr:
         mcr.command('tellraw @a [{"text":"' + event.user.nickname + '", "color":"red"},{"text":" Sharing this live!", "color":"yellow"}]')
         mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
 
 #Gift
-@client.on("gift")
+@client.on(GiftEvent)
 async def on_gift(event: GiftEvent):
     #Streakable Gift      
     print(f"{event.user.nickname} -> {event.gift.id} STREAK")
-    if event.gift.streakable and not event.gift.streaking:
+    if event.gift.streakable and not event.streaking:
         #Gift Rose = Golden Carrots
         if event.gift.id == 5655:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x Golden Carrots", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x Golden Carrots", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute at @p run give @p minecraft:golden_carrot')
@@ -70,67 +80,67 @@ async def on_gift(event: GiftEvent):
         #Gift Coffe = Creeper
         elif event.gift.id == 5333:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x Creeper", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x Creeper", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
-                    mcr.command('execute at @p run summon minecraft:creeper ~ ~5 ~')
+                    mcr.command('execute at @p run summon minecraft:creeper ~ ~ ~')
                 time.sleep(0.05)
                 i+=1
         #Gift Tiktok = Skeleton
         elif event.gift.id == 5269:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x Skeleton", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x Skeleton", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
-                    mcr.command('execute at @p run summon minecraft:skeleton ~ ~5 ~')
+                    mcr.command('execute at @p run summon minecraft:skeleton ~ ~ ~')
                 time.sleep(0.05)
                 i+=1
-        #Gift Lolipop = Witch
-        elif event.gift.id == 5657:
+        #Gift Friendship = Witch
+        elif event.gift.id == 9947:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x 2 Witch", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x 2 Witch", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
-                    mcr.command('execute at @p run summon minecraft:witch ~ ~5 ~')
+                    mcr.command('execute at @p run summon minecraft:witch ~ ~ ~')
                     time.sleep(0.05)
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
-                    mcr.command('execute at @p run summon minecraft:witch ~ ~5 ~')
+                    mcr.command('execute at @p run summon minecraft:witch ~ ~ ~')
                     time.sleep(0.05)
                     i+=1
         #Gift Coffee Big = Vindicator
         elif event.gift.id == 5933:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x 3 Vindicator", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x 3 Vindicator", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
-                    mcr.command('execute at @p run summon minecraft:vindicator ~ ~5 ~')
+                    mcr.command('execute at @p run summon minecraft:vindicator ~ ~ ~')
                     time.sleep(0.1)
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
-                    mcr.command('execute at @p run summon minecraft:vindicator ~ ~5 ~')
+                    mcr.command('execute at @p run summon minecraft:vindicator ~ ~ ~')
                     time.sleep(0.1)
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
-                    mcr.command('execute at @p run summon minecraft:vindicator ~ ~5 ~')
+                    mcr.command('execute at @p run summon minecraft:vindicator ~ ~ ~')
                     time.sleep(0.1)
                     i+=1
         #Gift Finger Heart = Totem of Undying
         elif event.gift.id == 5487:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x 3 Totem of Undying", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x 3 Totem of Undying", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute at @p run give @p minecraft:totem_of_undying')
@@ -139,10 +149,10 @@ async def on_gift(event: GiftEvent):
         #Gift GG = Enchanted Golden Apple
         elif event.gift.id == 6064:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x Golden Apple", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x Golden Apple", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute at @p run give @p minecraft:enchanted_golden_apple 1')
@@ -151,10 +161,10 @@ async def on_gift(event: GiftEvent):
         #Gift Nasi Lemak = Ender Pearl
         elif event.gift.id == 5588:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x Ender Pearl", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x Ender Pearl", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute at @p run give @p minecraft:ender_pearl 1')
@@ -163,10 +173,10 @@ async def on_gift(event: GiftEvent):
         #Gift I Love You = Nausea
         elif event.gift.id == 5779:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x Nausea", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x Nausea", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute at @p run effect give @p minecraft:nausea 30')
@@ -174,10 +184,10 @@ async def on_gift(event: GiftEvent):
         #Gift Parfume = Ender Eye
         elif event.gift.id == 5658:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x 20 Ender Eye", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x 20 Ender Eye", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute at @p run give @p minecraft:ender_eye 32')
@@ -186,10 +196,10 @@ async def on_gift(event: GiftEvent):
         #Gift Orange Juice = Iron Ingot
         elif event.gift.id == 5778:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x Iron Ingot", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x Iron Ingot", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute at @p run give @p minecraft:iron_ingot 1')
@@ -198,10 +208,10 @@ async def on_gift(event: GiftEvent):
         #Gift Cantik Dehh = Levitation
         elif event.gift.id == 7024:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x Levitation", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x Levitation", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute as @p run effect give @p minecraft:levitation 2')
@@ -210,22 +220,22 @@ async def on_gift(event: GiftEvent):
         #Gift Ice Tea = Spider
         elif event.gift.id == 5464:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x Spider", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x Spider", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
-                    mcr.command('execute at @p run summon minecraft:spider ~ ~5 ~')
+                    mcr.command('execute at @p run summon minecraft:spider ~ ~ ~')
                 time.sleep(0.05)
                 i+=1
         #Gift Doughnut = Evoker
         elif event.gift.id == 5879:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x 3 Evoker", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x 3 Evoker", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute at @p run summon minecraft:evoker')
@@ -240,10 +250,10 @@ async def on_gift(event: GiftEvent):
         #Gift Bouquet Flower = Lava Pool
         elif event.gift.id == 5780:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' Lava Pool", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' Lava Pool", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute at @p run fill ~2 ~ ~2 ~-2 ~ ~-2 lava')
@@ -252,10 +262,10 @@ async def on_gift(event: GiftEvent):
         #Gift Rosa = Iron Golem
         elif event.gift.id == 8913:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x 5 Iron Golem", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x 5 Iron Golem", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute at @p run summon minecraft:iron_golem ~ ~ ~')
@@ -276,10 +286,10 @@ async def on_gift(event: GiftEvent):
         #Gift DJ Set = Full Armor + Tool Iron
         elif event.gift.id == 6248:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x Full Armor Iron + Tool", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x Full Armor Iron + Tool", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('execute at @p run give @p iron_helmet{Enchantments:[{lvl:10,id:"minecraft:unbreaking"}]}')
@@ -295,7 +305,7 @@ async def on_gift(event: GiftEvent):
                 i+=1
         else:
             with con as mcr:
-                mcr.command('title @a subtitle {"text":" sent ' + str(event.gift.count) + ' x ' + str(event.gift.info.name) + '", "color":"white"}')
+                mcr.command('title @a subtitle {"text":" sent ' + str(event.repeat_count) + ' x ' + str(event.gift.info.name) + '", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             return
     #Non Streakable Gift          
@@ -310,7 +320,7 @@ async def on_gift(event: GiftEvent):
             while i < 5:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
-                    mcr.command('execute at @p run summon minecraft:tnt ~ ~5 ~ {Fuse:40}')
+                    mcr.command('execute at @p run summon minecraft:tnt ~ ~ ~ {Fuse:40}')
                 time.sleep(0.05)
                 i+=1
         #Gift Confetti = Enderman
@@ -347,7 +357,7 @@ async def on_gift(event: GiftEvent):
                 mcr.command('title @a subtitle {"text":"sent Delete Inventory", "color":"white"}')
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             i = 0
-            while event.gift.count > i:
+            while event.repeat_count > i:
                 with con as mcr:
                     mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                     mcr.command('clear @p')
@@ -372,7 +382,7 @@ async def on_gift(event: GiftEvent):
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
                 mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
                 mcr.command('execute at @p run fill ~-7 ~-2 ~-7 ~7 ~14 ~7 tnt')
-                mcr.command('execute at @p run fill ~-5 ~0 ~-5 ~5 ~12 ~5 air')
+                mcr.command('execute at @p run fill ~-5 ~0 ~-5 ~ ~12 ~ air')
                 mcr.command('execute at @p run summon minecraft:tnt ~ ~ ~ {Fuse:100}')
         #Gift Train = SERVER CRASH
         elif event.gift.id == 5978:
@@ -475,42 +485,7 @@ async def on_gift(event: GiftEvent):
                 mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
             return
 
-like_goal = 10000
-sisa = 0
-# OTHER COMMANDS
-with con as mcr:    
-    mcr.command('title @a times 5 20 5')
-    mcr.command('bossbar add 1 "Likes Goal = 0 / 10000"')
-    mcr.command('bossbar set minecraft:1 name "Like Goal = 0 / 10000"')
-    mcr.command('bossbar set minecraft:1 players @p')
 
-userlike = 0
-
-@client.on("like")
-async def on_like(event: LikeEvent):
-    #LIKE PER USER
-    global userlike
-    userlike = userlike + int(event.likes)
-    if userlike > 50:
-        with con as mcr:
-            mcr.command('title @a subtitle {"text":" sent Zombie", "color":"white"}')
-            mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
-            mcr.command('execute at @p run playsound minecraft:entity.experience_orb.pickup master @a ~ ~ ~ 10 1')
-            mcr.command('execute at @p run summon minecraft:zombie ~ ~5 ~')
-            userlike=0
-    #LIKE GOAL
-    global like_goal
-    with con as mcr:
-        mcr.command('bossbar set minecraft:1 name "Like Goals = ' + str(event.total_likes) + ' / ' + str(like_goal) +'"')
-        sisa = event.total_likes % 10000
-        mcr.command('bossbar set minecraft:1 value ' + str(sisa))
-        mcr.command('bossbar set minecraft:1 max 10000')
-    if event.total_likes > like_goal:
-        like_goal = round(int(event.total_likes) / 10000) * 10000 + 10000
-        # Input Command For Like Goal
-        with con as mcr:
-            mcr.command('title @a subtitle {"text":" Likes Goal Reached ", "color":"white"}')
-            mcr.command('title @a title {"text":"Congratulations!", "color":"yellow"}')
 
 def start_client():
     client.run()
