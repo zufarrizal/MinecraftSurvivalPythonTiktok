@@ -29,7 +29,7 @@ async def on_join(event: JoinEvent):
 
 @client.on(LikeEvent)
 async def on_like(event: LikeEvent):
-    if event.total % 50 == 0:   
+    if event.count > 10:   
         with con as mcr:
             mcr.command('title @a subtitle {"text":"sent Zombie", "color":"white"}')
             mcr.command('title @a title {"text":"' + event.user.nickname + '", "color":"yellow"}')
